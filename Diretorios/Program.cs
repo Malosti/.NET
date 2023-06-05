@@ -8,13 +8,16 @@ Console.WriteLine(salesData?.Total);
 
 
 var currentDirectory = Directory.GetCurrentDirectory();
-var storesDirectory = Path.Combine(currentDirectory, "stores");
-var salesFile = FindFile(storesDirectory);
+var storesDir = Path.Combine(currentDirectory, "stores");
 
 var salesTotalDir = Path.Combine(currentDirectory, "salesTotalDir");
 Directory.CreateDirectory(salesTotalDir);
 
-File.AppendAllText(Path.Combine(salesTotalDir, "totals.txt"), $"{salesData?.Total}{Environment.NewLine}");
+var salesFile = FindFile(storesDir);
+
+var salesTotal = CalculateSalesTotal(salesFile);
+
+File.AppendAllText(Path.Combine(salesTotalDir, "totals.txt"), $"{salesTotal}{Environment.NewLine}");
 
 
 
@@ -33,6 +36,20 @@ IEnumerable<string> FindFile(string folderName){
     return salesFile;
 }
 
+
+double CalculateSalesTotal (IEnumerable<string> salesFile){
+    double salesTotal = 0;
+
+    foreach(var file in salesFile){
+        string salesJson = File.ReadAllText(file);
+
+        SalesData? data = JsonConvert.DeserializeObject<SalesData?>(salesJson);
+
+        salesTotal += data?.Total ?? 0;
+    }
+    return salesTotal;
+}
+record SalesData (double Total);
 
 /*
 //Verifica se existe a o diretorio passado
